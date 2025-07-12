@@ -8,7 +8,6 @@ function App() {
   const handleGenerateMnemonic = () => {
     const newMnemonic = generateMnemonic()
     setMnemonic(newMnemonic)
-    // Remove console.log in production for security
     console.log('Generated Mnemonic:', newMnemonic)
   }
 
@@ -17,11 +16,22 @@ function App() {
       <button onClick={handleGenerateMnemonic}>
         Generate Mnemonic
       </button>
-      <h1>Hello World</h1>
+      <h1>Secret Recovery Phrase</h1>
       {mnemonic && (
-        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f0f0f0' }}>
+        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#004030' }}>
           <h3>Generated Mnemonic:</h3>
-          <p style={{ fontFamily: 'monospace' }}>{mnemonic}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '10px' }}>
+            {mnemonic.split(' ').map((word, index) => (
+              <div key={index} style={{ 
+                padding: '8px',  
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '14px'
+              }}>
+                <span style={{ fontWeight: 'bold', color: '#666' }}>{index + 1}.</span> {word}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
