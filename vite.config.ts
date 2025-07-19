@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({
-      // To add only specific polyfills, add them here. If no option is passed, adds all polyfills
-      include: ['buffer', 'crypto'],
+      // Include all necessary polyfills for crypto libraries
+      include: ['buffer', 'crypto', 'stream', 'util', 'events', 'string_decoder', 'process'],
       // Whether to polyfill `global` as well
       globals: {
         Buffer: true,
@@ -17,4 +17,7 @@ export default defineConfig({
       },
     }),
   ],
+  define: {
+    global: 'globalThis',
+  },
 })
