@@ -12,12 +12,15 @@ export interface SolanaWalletProps {
   mnemonic: string;
   publicKeys: string[];
   onAddWallet: () => Promise<void>;
+  onDeleteWallet: (index: number) => void;
   isLoading?: boolean;
 }
 
 export interface WalletItem {
   publicKey: string;
   index: number;
+  onDelete: (index: number) => void;
+  canDelete: boolean;
 }
 
 export interface CopyState {
@@ -31,4 +34,5 @@ export type WalletAction =
   | { type: 'SET_PUBLIC_KEYS'; payload: string[] }
   | { type: 'SET_CURRENT_INDEX'; payload: number }
   | { type: 'ADD_PUBLIC_KEY'; payload: string }
+  | { type: 'DELETE_WALLET'; payload: number }
   | { type: 'RESET_WALLET' }; 

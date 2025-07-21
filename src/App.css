@@ -32,6 +32,52 @@ body {
   margin-bottom: 3rem;
 }
 
+.create-wallet-button {
+  display: block;
+  margin: 0 auto;
+  font-size: 1.2em;
+  padding: 1.2rem 2.5rem;
+  background: #ffffff;
+  color: #0a0a0a;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.create-wallet-button:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+}
+
+.create-wallet-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.create-wallet-button.creating {
+  transform: scale(0.95);
+}
+
+.create-wallet-button .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #0a0a0a;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Animation Styles */
 .creation-animation {
   display: flex;
@@ -153,52 +199,6 @@ body {
   }
 }
 
-.create-wallet-button {
-  display: block;
-  margin: 0 auto;
-  font-size: 1.2em;
-  padding: 1.2rem 2.5rem;
-  background: #ffffff;
-  color: #0a0a0a;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 200px;
-}
-
-.create-wallet-button:hover:not(:disabled) {
-  background: #f0f0f0;
-  transform: translateY(-1px);
-}
-
-.create-wallet-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.create-wallet-button.creating {
-  transform: scale(0.95);
-}
-
-.create-wallet-button .loading-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #0a0a0a;
-  border-top: 2px solid transparent;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 8px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .wallet-section {
   margin-bottom: 3rem;
 }
@@ -226,10 +226,12 @@ body {
   padding: 1.2rem;
   margin-bottom: 1rem;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-  word-break: break-all;
   transition: all 0.2s ease;
   color: #ffffff;
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .wallet-item:hover {
@@ -239,6 +241,101 @@ body {
 
 .wallet-item:last-child {
   margin-bottom: 0;
+}
+
+.wallet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  text-align: left;
+}
+
+.wallet-address {
+  font-size: 0.9em;
+  color: #ccc;
+  word-break: break-all;
+}
+
+.wallet-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.delete-wallet-button {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-wallet-button:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.delete-confirmation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: slideIn 0.2s ease-out;
+}
+
+.confirm-text {
+  font-size: 0.85em;
+  color: #888;
+  margin-right: 0.25rem;
+}
+
+.confirm-delete-button {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirm-delete-button:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+.cancel-delete-button {
+  background: #6b7280;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-delete-button:hover {
+  background: #4b5563;
+  transform: scale(1.05);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .add-wallet-button {
@@ -501,6 +598,17 @@ body {
     font-size: 1em;
     padding: 1rem 2rem;
   }
+
+  .wallet-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .wallet-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 480px) {
@@ -516,6 +624,14 @@ body {
 
   .word-number {
     min-width: 16px;
+    font-size: 0.8em;
+  }
+
+  .wallet-info {
+    gap: 0.25rem;
+  }
+
+  .wallet-address {
     font-size: 0.8em;
   }
 }

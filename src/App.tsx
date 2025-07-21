@@ -32,6 +32,7 @@ const App: React.FC = () => {
     error: walletError,
     createWallet,
     addWallet,
+    deleteWallet,
   } = useWallet();
 
   // Clipboard operations hook
@@ -54,6 +55,11 @@ const App: React.FC = () => {
     if (walletState.mnemonic) {
       await copyToClipboard(walletState.mnemonic);
     }
+  };
+
+  // Handler for deleting a wallet
+  const handleDeleteWallet = (index: number): void => {
+    deleteWallet(index);
   };
 
   // Check if wallet has been created
@@ -119,6 +125,7 @@ const App: React.FC = () => {
                 mnemonic={walletState.mnemonic}
                 publicKeys={walletState.publicKeys}
                 onAddWallet={addWallet}
+                onDeleteWallet={handleDeleteWallet}
                 isLoading={isWalletLoading}
               />
 

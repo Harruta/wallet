@@ -24,6 +24,9 @@ export const MESSAGES = {
   COPY_INSTRUCTION: 'Click Anywhere To Copy',
   STORE_SAFELY: "Store this phrase safely. It's the only way to recover your wallets.",
   COPY_ERROR: 'Failed to copy to clipboard',
+  DELETE_CONFIRM: 'Are you sure you want to delete this wallet?',
+  DELETE_LAST_WALLET: 'Cannot delete the last wallet. You must have at least one wallet.',
+  WALLET_DELETED: 'Wallet deleted successfully',
 } as const;
 
 // Button labels
@@ -31,4 +34,5 @@ export const BUTTON_LABELS = {
   CREATE_WALLET: 'Create Sol Wallet',
   ADD_WALLET: 'Add Wallet',
   COPY_PHRASE: 'Copy Secret Phrase',
+  DELETE_WALLET: 'Delete',
 } as const; 

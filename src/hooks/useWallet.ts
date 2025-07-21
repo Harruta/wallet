@@ -5,7 +5,7 @@ import { Keypair } from '@solana/web3.js';
 import nacl from 'tweetnacl';
 
 import type { WalletState } from '../types/wallet';
-import { SOLANA_DERIVATION_PATH, ACCOUNT_SUFFIX } from '../constants/wallet';
+import { SOLANA_DERIVATION_PATH, ACCOUNT_SUFFIX, MESSAGES } from '../constants/wallet';
 
 /**
  * Custom hook for managing Solana wallet operations
@@ -96,6 +96,42 @@ export const useWallet = () => {
   }, [walletState.mnemonic, walletState.currentIndex, deriveKeypair]);
 
   /**
+   * Deletes a wallet at the specified index
+   */
+  const deleteWallet = useCallback((index: number): void => {
+    // Prevent deletion if only one wallet remains
+    if (walletState.publicKeys.length <= 1) {
+      setError(MESSAGES.DELETE_LAST_WALLET);
+      return;
+    }
+
+    // Validate index
+    if (index < 0 || index >= walletState.publicKeys.length) {
+      setError('Invalid wallet index');
+      return;
+    }
+
+    try {
+      // Remove wallet at specified index
+      const updatedPublicKeys = walletState.publicKeys.filter((_, i) => i !== index);
+      
+      setWalletState(prev => ({
+        ...prev,
+        publicKeys: updatedPublicKeys,
+      }));
+
+      setError(null);
+      
+      // Show success message briefly
+      console.log(MESSAGES.WALLET_DELETED);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete wallet';
+      setError(errorMessage);
+      console.error('Delete wallet failed:', err);
+    }
+  }, [walletState.publicKeys.length]);
+
+  /**
    * Resets the wallet state
    */
   const resetWallet = useCallback((): void => {
@@ -113,6 +149,7 @@ export const useWallet = () => {
     error,
     createWallet,
     addWallet,
+    deleteWallet,
     resetWallet,
   };
 }; 
