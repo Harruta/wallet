@@ -1,118 +1,139 @@
-import { useState } from "react";
-import { mnemonicToSeed } from "bip39";
-import { derivePath } from "ed25519-hd-key";
-import { Keypair } from "@solana/web3.js";
-import { generateMnemonic } from "bip39";
-import nacl from "tweetnacl";
-import './App.css'
+// React hooks
+import { useState } from 'react';
 
-interface SolanaWalletProps {
-  mnemonic: string;
-  publicKeys: string[];
-  setPublicKeys: (keys: string[]) => void;
-  currentIndex: number;
-  setCurrentIndex: (index: number) => void;
-}
+// Custom hooks
+import { useWallet } from './hooks/useWallet';
+import { useClipboard } from './hooks/useClipboard';
 
-export function SolanaWallet({ 
-  mnemonic, 
-  publicKeys, 
-  setPublicKeys, 
-  currentIndex, 
-  setCurrentIndex 
-}: SolanaWalletProps) {
-  const addWallet = async () => {
-    const seed = await mnemonicToSeed(mnemonic);
-    const path = `m/44'/501'/${currentIndex}'/0'`;
-    const derivedSeed = derivePath(path, seed.toString("hex")).key;
-    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-    const keypair = Keypair.fromSecretKey(secret);
-    setCurrentIndex(currentIndex + 1);
-    setPublicKeys([...publicKeys, keypair.publicKey.toBase58()]);
+// Components
+import { SolanaWallet } from './components/SolanaWallet';
+import { MnemonicDisplay } from './components/MnemonicDisplay';
+import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Constants
+import { BUTTON_LABELS } from './constants/wallet';
+
+// Styles
+import './App.css';
+
+/**
+ * Main application component
+ * Manages wallet creation and displays wallet information with mnemonic phrase
+ */
+const App: React.FC = () => {
+  // Animation state
+  const [showContent, setShowContent] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Wallet operations hook
+  const {
+    walletState,
+    isLoading: isWalletLoading,
+    error: walletError,
+    createWallet,
+    addWallet,
+  } = useWallet();
+
+  // Clipboard operations hook
+  const { copyState, copyToClipboard } = useClipboard();
+
+  // Handler for creating a new wallet
+  const handleCreateWallet = async (): Promise<void> => {
+    setIsAnimating(true);
+    await createWallet();
+    
+    // Show content after a brief delay for animation effect
+    setTimeout(() => {
+      setShowContent(true);
+      setIsAnimating(false);
+    }, 1000);
   };
 
-  return (
-    <div className="wallet-section">
-      <h2>Solana Wallets</h2>
-      <div className="wallet-list">
-        {publicKeys.length === 0 ? (
-          <div className="empty-state">No wallets created yet</div>
-        ) : (
-          publicKeys.map((publicKey: string, index: number) => (
-            <div key={index} className="wallet-item">
-              <strong>Wallet {index + 1}:</strong> {publicKey}
-            </div>
-          ))
-        )}
-        <button onClick={addWallet} className="add-wallet-button">
-          Add Wallet
-        </button>
-      </div>
-    </div>
-  );
-}
+  // Handler for copying mnemonic to clipboard
+  const handleCopyMnemonic = async (): Promise<void> => {
+    if (walletState.mnemonic) {
+      await copyToClipboard(walletState.mnemonic);
+    }
+  };
 
-function App() {
-  const [mnemonic, setMnemonic] = useState<string>('')
-  const [publicKeys, setPublicKeys] = useState<string[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const createWallet = async () => {
-    // Generate mnemonic
-    const newMnemonic = generateMnemonic() 
-    setMnemonic(newMnemonic)
-    
-    // Reset wallet state
-    setPublicKeys([]);
-    setCurrentIndex(0);
-    
-    // Create first wallet automatically
-    const seed = await mnemonicToSeed(newMnemonic);
-    const path = `m/44'/501'/0'/0'`;
-    const derivedSeed = derivePath(path, seed.toString("hex")).key;
-    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-    const keypair = Keypair.fromSecretKey(secret);
-    
-    setPublicKeys([keypair.publicKey.toBase58()]);
-    setCurrentIndex(1);
-  }
+  // Check if wallet has been created
+  const hasWallet = Boolean(walletState.mnemonic);
 
   return (
-    <div className="app">
-      <h1> Solana Wallet Generator</h1>
-      
-      <button onClick={createWallet} className="create-wallet-button">
-        Create Sol Wallet
-      </button>
+    <ErrorBoundary>
+      <div className="app">
+        <header className="app-header">
+          <h1>Solana Wallet Generator</h1>
+        </header>
 
-      {mnemonic && (
-        <>
-          <SolanaWallet 
-            mnemonic={mnemonic}
-            publicKeys={publicKeys}
-            setPublicKeys={setPublicKeys}
-            currentIndex={currentIndex}
-            setCurrentIndex={setCurrentIndex}
-          />
-          
-          <div className="mnemonic-section">
-            <h2>🔐 Secret Recovery Phrase</h2>
-            <p style={{ color: '#888', fontSize: '0.9em', marginBottom: '1rem' }}>
-              Store this phrase safely. It's the only way to recover your wallets.
-            </p>
-            <div className="mnemonic-grid">
-              {mnemonic.split(' ').map((word: string, index: number) => (
-                <div key={index} className="mnemonic-word">
-                  <span className="word-number">{index + 1}.</span>
-                  {word}
+        <main className="app-main">
+          {/* Wallet Creation Section */}
+          <section className="wallet-creation-section">
+            <button
+              onClick={handleCreateWallet}
+              className={`create-wallet-button ${isAnimating ? 'creating' : ''}`}
+              disabled={isWalletLoading}
+              aria-label="Create new Solana wallet"
+              type="button"
+            >
+              {isWalletLoading ? (
+                <>
+                  <div className="loading-spinner"></div>
+                  Creating Wallet...
+                </>
+              ) : (
+                BUTTON_LABELS.CREATE_WALLET
+              )}
+            </button>
+
+            {/* Display wallet error if exists */}
+            {walletError && (
+              <div className="error-message" role="alert">
+                <strong>Error:</strong> {walletError}
+              </div>
+            )}
+          </section>
+
+          {/* Loading Animation */}
+          {isAnimating && (
+            <div className="creation-animation">
+              <div className="animation-container">
+                <div className="pulse-ring"></div>
+                <div className="pulse-ring pulse-ring-2"></div>
+                <div className="pulse-ring pulse-ring-3"></div>
+                <div className="wallet-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zM12 16h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                  </svg>
                 </div>
-              ))}
+              </div>
+              <p className="animation-text">Generating your secure wallet...</p>
             </div>
-          </div>
-        </>
-      )}
-    </div>
-   )
-}
+          )}
 
-export default App
+          {/* Wallet Display Section - Only show when wallet exists and animation is complete */}
+          {hasWallet && showContent && (
+            <div className="wallet-content-container">
+              {/* Solana Wallets List */}
+              <SolanaWallet
+                mnemonic={walletState.mnemonic}
+                publicKeys={walletState.publicKeys}
+                onAddWallet={addWallet}
+                isLoading={isWalletLoading}
+              />
+
+              {/* Mnemonic Phrase Display */}
+              <MnemonicDisplay
+                mnemonic={walletState.mnemonic}
+                copyState={copyState}
+                onCopy={handleCopyMnemonic}
+              />
+            </div>
+          )}
+        </main>
+      </div>
+    </ErrorBoundary>
+  );
+};
+
+export default App;
